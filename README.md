@@ -21,3 +21,7 @@ Open `docs/index.html` in your browser.
 
 ## Source
 - Standings data: `https://firstcycling.com/`
+
+
+## App Link
+[![Live Demo](https://img.shields.io/badge/Live-Demo-blue)](https://vince3453463.github.io/001_giro/)
