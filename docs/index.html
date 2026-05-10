@@ -1,0 +1,1874 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Giro d'Italia 2026 — dashboard (MVP)</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0b1020;
+      --panel: rgba(255,255,255,0.06);
+      --text: #e8eefc;
+      --muted: rgba(232,238,252,0.75);
+      --border: rgba(232,238,252,0.16);
+      --accent: #7aa2ff;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f6f7fb;
+        --panel: rgba(0,0,0,0.04);
+        --text: #0d1321;
+        --muted: rgba(13,19,33,0.70);
+        --border: rgba(13,19,33,0.16);
+        --accent: #2f5bff;
+      }
+    }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 16px 60px;
+    }
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 0.2px;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    @media (min-width: 980px) {
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 14px 10px;
+      overflow: hidden;
+    }
+    .card h2 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+    .table th, .table td {
+      padding: 8px 8px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      text-align: left;
+      white-space: nowrap;
+    }
+    .table th {
+      position: sticky;
+      top: 0;
+      background: rgba(0,0,0,0.14);
+    }
+    @media (prefers-color-scheme: light) {
+      .table th {
+        background: rgba(255,255,255,0.72);
+      }
+    }
+    .note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .scroll {
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Giro d'Italia 2026 — dashboard (MVP)</h1>
+      <div class="meta">
+        <span><strong>Updated</strong>: 2026-05-10 13:58 UTC</span>
+        <span><a href="https://firstcycling.com/race.php?r=13&y=2026&e=02" rel="noreferrer" target="_blank">Stage source</a></span>
+        <span><a href="https://firstcycling.com/race.php?r=13&y=2026" rel="noreferrer" target="_blank">Race source</a></span>
+      </div>
+    </header>
+
+    <div class="grid">
+      <section class="card">
+        <h2>Stage results</h2>
+        <div class="scroll"><table class="dataframe table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Pos</th>
+      <th>Unnamed: 1</th>
+      <th>Unnamed: 2</th>
+      <th>Rider</th>
+      <th>Team</th>
+      <th>UCI</th>
+      <th>Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td></td>
+      <td></td>
+      <td>Silva Thomas</td>
+      <td>XDS Astana Team</td>
+      <td>180.0</td>
+      <td>05:39:25</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td></td>
+      <td></td>
+      <td>Stork Florian</td>
+      <td>Tudor Pro Cycling Team</td>
+      <td>130.0</td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td></td>
+      <td></td>
+      <td>Ciccone Giulio</td>
+      <td>Lidl-Trek</td>
+      <td>95.0</td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td></td>
+      <td></td>
+      <td>Scaroni Christian</td>
+      <td>XDS Astana Team</td>
+      <td>80.0</td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td></td>
+      <td></td>
+      <td>Pellizzari Giulio</td>
+      <td>Red Bull-BORA-hansgrohe</td>
+      <td>60.0</td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td></td>
+      <td></td>
+      <td>Sobrero Matteo</td>
+      <td>Lidl-Trek</td>
+      <td>45.0</td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td></td>
+      <td></td>
+      <td>Leknessund Andreas</td>
+      <td>Uno-X Mobility</td>
+      <td>40.0</td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td></td>
+      <td></td>
+      <td>Christen Jan</td>
+      <td>UAE Team Emirates-XRG</td>
+      <td>35.0</td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td></td>
+      <td></td>
+      <td>Tjøtta Martin</td>
+      <td>Uno-X Mobility</td>
+      <td>30.0</td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>10</td>
+      <td></td>
+      <td></td>
+      <td>Rondel Mathys</td>
+      <td>Tudor Pro Cycling Team</td>
+      <td>25.0</td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>11</td>
+      <td></td>
+      <td></td>
+      <td>Hindley Jai</td>
+      <td>Red Bull-BORA-hansgrohe</td>
+      <td>20.0</td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>12</td>
+      <td></td>
+      <td></td>
+      <td>Romo Javier</td>
+      <td>Movistar Team</td>
+      <td>15.0</td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>13</td>
+      <td></td>
+      <td></td>
+      <td>Van Eetvelt Lennert</td>
+      <td>Lotto-Intermarché</td>
+      <td>10.0</td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>14</td>
+      <td></td>
+      <td></td>
+      <td>Rubio Einer</td>
+      <td>Movistar Team</td>
+      <td>5.0</td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>15</td>
+      <td></td>
+      <td></td>
+      <td>Piganzoli Davide</td>
+      <td>Team Visma | Lease a Bike</td>
+      <td>2.0</td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>16</td>
+      <td></td>
+      <td></td>
+      <td>Hirt Jan</td>
+      <td>NSN Cycling Team</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>17</td>
+      <td></td>
+      <td></td>
+      <td>Caruso Damiano</td>
+      <td>Bahrain Victorious</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>18</td>
+      <td></td>
+      <td></td>
+      <td>Engelhardt Felix</td>
+      <td>Team Jayco-AlUla</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>19</td>
+      <td></td>
+      <td></td>
+      <td>Arensman Thymen</td>
+      <td>Netcompany INEOS Cycling Team</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>20</td>
+      <td></td>
+      <td></td>
+      <td>Rafferty Darren</td>
+      <td>EF Education-EasyPost</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>21</td>
+      <td></td>
+      <td></td>
+      <td>Vingegaard Jonas</td>
+      <td>Team Visma | Lease a Bike</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>22</td>
+      <td></td>
+      <td></td>
+      <td>Mas Enric</td>
+      <td>Movistar Team</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>23</td>
+      <td></td>
+      <td></td>
+      <td>Kulset Johannes</td>
+      <td>Uno-X Mobility</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>24</td>
+      <td></td>
+      <td></td>
+      <td>Kench Josh</td>
+      <td>Groupama-FDJ United</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>25</td>
+      <td></td>
+      <td></td>
+      <td>Bernal Egan</td>
+      <td>Netcompany INEOS Cycling Team</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>26</td>
+      <td></td>
+      <td></td>
+      <td>López Martin</td>
+      <td>XDS Astana Team</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>27</td>
+      <td></td>
+      <td></td>
+      <td>Storer Michael</td>
+      <td>Tudor Pro Cycling Team</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>28</td>
+      <td></td>
+      <td></td>
+      <td>Zana Filippo</td>
+      <td>Soudal Quick-Step</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>29</td>
+      <td></td>
+      <td></td>
+      <td>Beloki Markel</td>
+      <td>EF Education-EasyPost</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>30</td>
+      <td></td>
+      <td></td>
+      <td>Gall Felix</td>
+      <td>Decathlon CMA CGM Team</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>31</td>
+      <td></td>
+      <td></td>
+      <td>Cepeda Alexander</td>
+      <td>EF Education-EasyPost</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td></td>
+      <td></td>
+      <td>Lopez Juan Pedro</td>
+      <td>Movistar Team</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>33</td>
+      <td></td>
+      <td></td>
+      <td>Aleotti Giovanni</td>
+      <td>Red Bull-BORA-hansgrohe</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>34</td>
+      <td></td>
+      <td></td>
+      <td>O'Connor Ben</td>
+      <td>Team Jayco-AlUla</td>
+      <td></td>
+      <td>+ 00</td>
+    </tr>
+    <tr>
+      <td>35</td>
+      <td></td>
+      <td></td>
+      <td>Løland Sakarias Koller</td>
+      <td>Uno-X Mobility</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>36</td>
+      <td></td>
+      <td></td>
+      <td>Raccagni Noviero Andrea</td>
+      <td>Soudal Quick-Step</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>37</td>
+      <td></td>
+      <td></td>
+      <td>Busatto Francesco</td>
+      <td>Alpecin-Premier Tech</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>38</td>
+      <td></td>
+      <td></td>
+      <td>Mifsud Andrea</td>
+      <td>Team Polti VisitMalta</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>39</td>
+      <td></td>
+      <td></td>
+      <td>Segaert Alec</td>
+      <td>Bahrain Victorious</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>40</td>
+      <td></td>
+      <td></td>
+      <td>Crescioli Ludovico</td>
+      <td>Team Polti VisitMalta</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>41</td>
+      <td></td>
+      <td></td>
+      <td>Leemreize Gijs</td>
+      <td>Team Picnic PostNL</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>42</td>
+      <td></td>
+      <td></td>
+      <td>Poels Wout</td>
+      <td>Unibet Rose Rockets</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>43</td>
+      <td></td>
+      <td></td>
+      <td>Arrieta Igor</td>
+      <td>UAE Team Emirates-XRG</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>44</td>
+      <td></td>
+      <td></td>
+      <td>Sheffield Magnus</td>
+      <td>Netcompany INEOS Cycling Team</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>45</td>
+      <td></td>
+      <td></td>
+      <td>Harper Chris</td>
+      <td>Pinarello-Q36.5 Pro Cycling Team</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>46</td>
+      <td></td>
+      <td></td>
+      <td>Aular Orluis</td>
+      <td>Movistar Team</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>47</td>
+      <td></td>
+      <td></td>
+      <td>de la Cruz David</td>
+      <td>Pinarello-Q36.5 Pro Cycling Team</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>48</td>
+      <td></td>
+      <td></td>
+      <td>Pesenti Thomas</td>
+      <td>Team Polti VisitMalta</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>49</td>
+      <td></td>
+      <td></td>
+      <td>Vlasov Aleksandr</td>
+      <td>Red Bull-BORA-hansgrohe</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>50</td>
+      <td></td>
+      <td></td>
+      <td>Zwiehoff Ben</td>
+      <td>Red Bull-BORA-hansgrohe</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>51</td>
+      <td></td>
+      <td></td>
+      <td>Lemmen Bart</td>
+      <td>Team Visma | Lease a Bike</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>52</td>
+      <td></td>
+      <td></td>
+      <td>Gee-West Derek</td>
+      <td>Lidl-Trek</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>53</td>
+      <td></td>
+      <td></td>
+      <td>Ulissi Diego</td>
+      <td>XDS Astana Team</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>54</td>
+      <td></td>
+      <td></td>
+      <td>Kuss Sepp</td>
+      <td>Team Visma | Lease a Bike</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>55</td>
+      <td></td>
+      <td></td>
+      <td>Garofoli Gianmarco</td>
+      <td>Soudal Quick-Step</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>56</td>
+      <td></td>
+      <td></td>
+      <td>Pinarello Alessandro</td>
+      <td>NSN Cycling Team</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>57</td>
+      <td></td>
+      <td></td>
+      <td>Lund Andresen Tobias</td>
+      <td>Decathlon CMA CGM Team</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>58</td>
+      <td></td>
+      <td></td>
+      <td>Eulalio Afonso</td>
+      <td>Bahrain Victorious</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>59</td>
+      <td></td>
+      <td></td>
+      <td>Hatherly Alan</td>
+      <td>Team Jayco-AlUla</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>60</td>
+      <td></td>
+      <td></td>
+      <td>Barta William</td>
+      <td>Tudor Pro Cycling Team</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>61</td>
+      <td></td>
+      <td></td>
+      <td>Scotson Callum</td>
+      <td>Decathlon CMA CGM Team</td>
+      <td></td>
+      <td>+ 01:01</td>
+    </tr>
+    <tr>
+      <td>62</td>
+      <td></td>
+      <td></td>
+      <td>Kubis Lukas</td>
+      <td>Unibet Rose Rockets</td>
+      <td></td>
+      <td>+ 01:28</td>
+    </tr>
+    <tr>
+      <td>63</td>
+      <td></td>
+      <td></td>
+      <td>Schultz Nick</td>
+      <td>NSN Cycling Team</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>64</td>
+      <td></td>
+      <td></td>
+      <td>Tsvetkov Nikita</td>
+      <td>Bardiani-CSF 7 Saber</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>65</td>
+      <td></td>
+      <td></td>
+      <td>González David</td>
+      <td>Pinarello-Q36.5 Pro Cycling Team</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>66</td>
+      <td></td>
+      <td></td>
+      <td>Bayer Tobias</td>
+      <td>Alpecin-Premier Tech</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>67</td>
+      <td></td>
+      <td></td>
+      <td>Strong Corbin</td>
+      <td>NSN Cycling Team</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>68</td>
+      <td></td>
+      <td></td>
+      <td>Denz Nico</td>
+      <td>Red Bull-BORA-hansgrohe</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>69</td>
+      <td></td>
+      <td></td>
+      <td>Magnier Paul</td>
+      <td>Soudal Quick-Step</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>70</td>
+      <td></td>
+      <td></td>
+      <td>Paletti Luca</td>
+      <td>Bardiani-CSF 7 Saber</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>71</td>
+      <td></td>
+      <td></td>
+      <td>Milan Jonathan</td>
+      <td>Lidl-Trek</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>72</td>
+      <td></td>
+      <td></td>
+      <td>Zukowsky Nickolas</td>
+      <td>Pinarello-Q36.5 Pro Cycling Team</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>73</td>
+      <td></td>
+      <td></td>
+      <td>Tonelli Alessandro</td>
+      <td>Team Polti VisitMalta</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>74</td>
+      <td></td>
+      <td></td>
+      <td>Turner Ben</td>
+      <td>Netcompany INEOS Cycling Team</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>75</td>
+      <td></td>
+      <td></td>
+      <td>Tarozzi Manuele</td>
+      <td>Bardiani-CSF 7 Saber</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>76</td>
+      <td></td>
+      <td></td>
+      <td>Zambanini Edoardo</td>
+      <td>Bahrain Victorious</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>77</td>
+      <td></td>
+      <td></td>
+      <td>Warbasse Lawrence</td>
+      <td>Tudor Pro Cycling Team</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>78</td>
+      <td></td>
+      <td></td>
+      <td>Oliveira Nelson</td>
+      <td>Movistar Team</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>79</td>
+      <td></td>
+      <td></td>
+      <td>Rota Lorenzo</td>
+      <td>Lotto-Intermarché</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>80</td>
+      <td></td>
+      <td></td>
+      <td>Campenaerts Victor</td>
+      <td>Team Visma | Lease a Bike</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>81</td>
+      <td></td>
+      <td></td>
+      <td>Mühlberger Gregor</td>
+      <td>Decathlon CMA CGM Team</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>82</td>
+      <td></td>
+      <td></td>
+      <td>Staune-Mittet Johannes</td>
+      <td>Decathlon CMA CGM Team</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>83</td>
+      <td></td>
+      <td></td>
+      <td>Larsen Niklas</td>
+      <td>Unibet Rose Rockets</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>84</td>
+      <td></td>
+      <td></td>
+      <td>Gualdi Simone</td>
+      <td>Lotto-Intermarché</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>85</td>
+      <td></td>
+      <td></td>
+      <td>Rolland Brieuc</td>
+      <td>Groupama-FDJ United</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>86</td>
+      <td></td>
+      <td></td>
+      <td>Bouwman Koen</td>
+      <td>Team Jayco-AlUla</td>
+      <td></td>
+      <td>+ 02:05</td>
+    </tr>
+    <tr>
+      <td>87</td>
+      <td></td>
+      <td></td>
+      <td>Rutsch Jonas</td>
+      <td>Lotto-Intermarché</td>
+      <td></td>
+      <td>+ 04:17</td>
+    </tr>
+    <tr>
+      <td>88</td>
+      <td></td>
+      <td></td>
+      <td>Rojas Vicente</td>
+      <td>Bardiani-CSF 7 Saber</td>
+      <td></td>
+      <td>+ 04:17</td>
+    </tr>
+    <tr>
+      <td>89</td>
+      <td></td>
+      <td></td>
+      <td>Marcellusi Martin</td>
+      <td>Bardiani-CSF 7 Saber</td>
+      <td></td>
+      <td>+ 04:17</td>
+    </tr>
+    <tr>
+      <td>90</td>
+      <td></td>
+      <td></td>
+      <td>Barguil Warren</td>
+      <td>Team Picnic PostNL</td>
+      <td></td>
+      <td>+ 04:17</td>
+    </tr>
+    <tr>
+      <td>91</td>
+      <td></td>
+      <td></td>
+      <td>Pedersen Rasmus Søjberg</td>
+      <td>Decathlon CMA CGM Team</td>
+      <td></td>
+      <td>+ 05:03</td>
+    </tr>
+    <tr>
+      <td>92</td>
+      <td></td>
+      <td></td>
+      <td>Milesi Lorenzo</td>
+      <td>Movistar Team</td>
+      <td></td>
+      <td>+ 05:26</td>
+    </tr>
+    <tr>
+      <td>93</td>
+      <td></td>
+      <td></td>
+      <td>Barthe Cyril</td>
+      <td>Groupama-FDJ United</td>
+      <td></td>
+      <td>+ 05:26</td>
+    </tr>
+    <tr>
+      <td>94</td>
+      <td></td>
+      <td></td>
+      <td>Huens Axel</td>
+      <td>Groupama-FDJ United</td>
+      <td></td>
+      <td>+ 05:26</td>
+    </tr>
+    <tr>
+      <td>95</td>
+      <td></td>
+      <td></td>
+      <td>van Dijke Mick</td>
+      <td>Red Bull-BORA-hansgrohe</td>
+      <td></td>
+      <td>+ 05:26</td>
+    </tr>
+    <tr>
+      <td>96</td>
+      <td></td>
+      <td></td>
+      <td>Haig Jack</td>
+      <td>Netcompany INEOS Cycling Team</td>
+      <td></td>
+      <td>+ 05:26</td>
+    </tr>
+    <tr>
+      <td>97</td>
+      <td></td>
+      <td></td>
+      <td>Moscon Gianni</td>
+      <td>Red Bull-BORA-hansgrohe</td>
+      <td></td>
+      <td>+ 05:26</td>
+    </tr>
+    <tr>
+      <td>98</td>
+      <td></td>
+      <td></td>
+      <td>Christen Fabio</td>
+      <td>Pinarello-Q36.5 Pro Cycling Team</td>
+      <td></td>
+      <td>+ 05:26</td>
+    </tr>
+    <tr>
+      <td>99</td>
+      <td></td>
+      <td></td>
+      <td>Mihkels Madis</td>
+      <td>EF Education-EasyPost</td>
+      <td></td>
+      <td>+ 05:26</td>
+    </tr>
+    <tr>
+      <td>100</td>
+      <td></td>
+      <td></td>
+      <td>Ghebreigzabhier Amanuel</td>
+      <td>Lidl-Trek</td>
+      <td></td>
+      <td>+ 05:26</td>
+    </tr>
+    <tr>
+      <td>101</td>
+      <td></td>
+      <td></td>
+      <td>Aerts Toon</td>
+      <td>Lotto-Intermarché</td>
+      <td></td>
+      <td>+ 05:26</td>
+    </tr>
+    <tr>
+      <td>102</td>
+      <td></td>
+      <td></td>
+      <td>Narvaez Jhonatan</td>
+      <td>UAE Team Emirates-XRG</td>
+      <td></td>
+      <td>+ 05:26</td>
+    </tr>
+    <tr>
+      <td>103</td>
+      <td></td>
+      <td></td>
+      <td>Valgren Michael</td>
+      <td>EF Education-EasyPost</td>
+      <td></td>
+      <td>+ 05:26</td>
+    </tr>
+    <tr>
+      <td>104</td>
+      <td></td>
+      <td></td>
+      <td>García Cortina Iván</td>
+      <td>Movistar Team</td>
+      <td></td>
+      <td>+ 06:45</td>
+    </tr>
+    <tr>
+      <td>105</td>
+      <td></td>
+      <td></td>
+      <td>Miholjevic Fran</td>
+      <td>Bahrain Victorious</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>106</td>
+      <td></td>
+      <td></td>
+      <td>Stannard Robert</td>
+      <td>Bahrain Victorious</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>107</td>
+      <td></td>
+      <td></td>
+      <td>Svestad-Bårdseng Embret</td>
+      <td>Netcompany INEOS Cycling Team</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>108</td>
+      <td></td>
+      <td></td>
+      <td>Swift Connor</td>
+      <td>Netcompany INEOS Cycling Team</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>109</td>
+      <td></td>
+      <td></td>
+      <td>Stuyven Jasper</td>
+      <td>Soudal Quick-Step</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>110</td>
+      <td></td>
+      <td></td>
+      <td>Naesen Oliver</td>
+      <td>Decathlon CMA CGM Team</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>111</td>
+      <td></td>
+      <td></td>
+      <td>Kopecky Matyas</td>
+      <td>Unibet Rose Rockets</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>112</td>
+      <td></td>
+      <td></td>
+      <td>Kopecky Tomas</td>
+      <td>Unibet Rose Rockets</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>113</td>
+      <td></td>
+      <td></td>
+      <td>Bastiaens Ayco</td>
+      <td>Soudal Quick-Step</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>114</td>
+      <td></td>
+      <td></td>
+      <td>Kielich Timo</td>
+      <td>Team Visma | Lease a Bike</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>115</td>
+      <td></td>
+      <td></td>
+      <td>van Gestel Dries</td>
+      <td>Soudal Quick-Step</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>116</td>
+      <td></td>
+      <td></td>
+      <td>Dversnes Fredrik</td>
+      <td>Uno-X Mobility</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>117</td>
+      <td></td>
+      <td></td>
+      <td>de Vries Hartthijs</td>
+      <td>Unibet Rose Rockets</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>118</td>
+      <td></td>
+      <td></td>
+      <td>Plowright Jensen</td>
+      <td>Alpecin-Premier Tech</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>119</td>
+      <td></td>
+      <td></td>
+      <td>Vergallito Luca</td>
+      <td>Alpecin-Premier Tech</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>120</td>
+      <td></td>
+      <td></td>
+      <td>Magli Filippo</td>
+      <td>Bardiani-CSF 7 Saber</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>121</td>
+      <td></td>
+      <td></td>
+      <td>Gudmestad Tord</td>
+      <td>Decathlon CMA CGM Team</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>122</td>
+      <td></td>
+      <td></td>
+      <td>Vernon Ethan</td>
+      <td>NSN Cycling Team</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>123</td>
+      <td></td>
+      <td></td>
+      <td>Ackermann Pascal</td>
+      <td>Team Jayco-AlUla</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>124</td>
+      <td></td>
+      <td></td>
+      <td>Donaldson Robert</td>
+      <td>Team Jayco-AlUla</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>125</td>
+      <td></td>
+      <td></td>
+      <td>Jacobs Johan</td>
+      <td>Groupama-FDJ United</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>126</td>
+      <td></td>
+      <td></td>
+      <td>Donovan Mark</td>
+      <td>Pinarello-Q36.5 Pro Cycling Team</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>127</td>
+      <td></td>
+      <td></td>
+      <td>Ballerini Davide</td>
+      <td>XDS Astana Team</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>128</td>
+      <td></td>
+      <td></td>
+      <td>Livyns Arjen</td>
+      <td>XDS Astana Team</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>129</td>
+      <td></td>
+      <td></td>
+      <td>Bettiol Alberto</td>
+      <td>XDS Astana Team</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>130</td>
+      <td></td>
+      <td></td>
+      <td>Ganna Filippo</td>
+      <td>Netcompany INEOS Cycling Team</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>131</td>
+      <td></td>
+      <td></td>
+      <td>Maestri Mirco</td>
+      <td>Team Polti VisitMalta</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>132</td>
+      <td></td>
+      <td></td>
+      <td>Consonni Simone</td>
+      <td>Lidl-Trek</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>133</td>
+      <td></td>
+      <td></td>
+      <td>Juul-Jensen Christopher</td>
+      <td>Team Jayco-AlUla</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>134</td>
+      <td></td>
+      <td></td>
+      <td>Van den Bossche Fabio</td>
+      <td>Soudal Quick-Step</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>135</td>
+      <td></td>
+      <td></td>
+      <td>Bax Sjoerd</td>
+      <td>Pinarello-Q36.5 Pro Cycling Team</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>136</td>
+      <td></td>
+      <td></td>
+      <td>Sevilla Diego</td>
+      <td>Team Polti VisitMalta</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>137</td>
+      <td></td>
+      <td></td>
+      <td>Morgado António</td>
+      <td>UAE Team Emirates-XRG</td>
+      <td></td>
+      <td>+ 07:04</td>
+    </tr>
+    <tr>
+      <td>138</td>
+      <td></td>
+      <td></td>
+      <td>de Jong Timo</td>
+      <td>Team Picnic PostNL</td>
+      <td></td>
+      <td>+ 09:01</td>
+    </tr>
+    <tr>
+      <td>139</td>
+      <td></td>
+      <td></td>
+      <td>Teutenberg Tim Torn</td>
+      <td>Lidl-Trek</td>
+      <td></td>
+      <td>+ 09:01</td>
+    </tr>
+    <tr>
+      <td>140</td>
+      <td></td>
+      <td></td>
+      <td>Penhoët Paul</td>
+      <td>Groupama-FDJ United</td>
+      <td></td>
+      <td>+ 09:01</td>
+    </tr>
+    <tr>
+      <td>141</td>
+      <td></td>
+      <td></td>
+      <td>Froidevaux Robin</td>
+      <td>Tudor Pro Cycling Team</td>
+      <td></td>
+      <td>+ 09:01</td>
+    </tr>
+    <tr>
+      <td>142</td>
+      <td></td>
+      <td></td>
+      <td>Price-Pejtersen Johan</td>
+      <td>Alpecin-Premier Tech</td>
+      <td></td>
+      <td>+ 09:01</td>
+    </tr>
+    <tr>
+      <td>143</td>
+      <td></td>
+      <td></td>
+      <td>Bjerg Mikkel</td>
+      <td>UAE Team Emirates-XRG</td>
+      <td></td>
+      <td>+ 09:01</td>
+    </tr>
+    <tr>
+      <td>144</td>
+      <td></td>
+      <td></td>
+      <td>Paasschens Mathijs</td>
+      <td>Bahrain Victorious</td>
+      <td></td>
+      <td>+ 09:01</td>
+    </tr>
+    <tr>
+      <td>145</td>
+      <td></td>
+      <td></td>
+      <td>Lienhard Fabian</td>
+      <td>Tudor Pro Cycling Team</td>
+      <td></td>
+      <td>+ 09:01</td>
+    </tr>
+    <tr>
+      <td>146</td>
+      <td></td>
+      <td></td>
+      <td>Zanoncello Enrico</td>
+      <td>Bardiani-CSF 7 Saber</td>
+      <td></td>
+      <td>+ 09:14</td>
+    </tr>
+    <tr>
+      <td>147</td>
+      <td></td>
+      <td></td>
+      <td>Turconi Filippo</td>
+      <td>Bardiani-CSF 7 Saber</td>
+      <td></td>
+      <td>+ 09:14</td>
+    </tr>
+    <tr>
+      <td>148</td>
+      <td></td>
+      <td></td>
+      <td>Mozzato Luca</td>
+      <td>Tudor Pro Cycling Team</td>
+      <td></td>
+      <td>+ 09:17</td>
+    </tr>
+    <tr>
+      <td>149</td>
+      <td></td>
+      <td></td>
+      <td>Lonardi Giovanni</td>
+      <td>Team Polti VisitMalta</td>
+      <td></td>
+      <td>+ 09:17</td>
+    </tr>
+    <tr>
+      <td>150</td>
+      <td></td>
+      <td></td>
+      <td>Groenewegen Dylan</td>
+      <td>Unibet Rose Rockets</td>
+      <td></td>
+      <td>+ 09:17</td>
+    </tr>
+    <tr>
+      <td>151</td>
+      <td></td>
+      <td></td>
+      <td>Reinders Elmar</td>
+      <td>Unibet Rose Rockets</td>
+      <td></td>
+      <td>+ 09:17</td>
+    </tr>
+    <tr>
+      <td>152</td>
+      <td></td>
+      <td></td>
+      <td>Hoelgaard Markus</td>
+      <td>Uno-X Mobility</td>
+      <td></td>
+      <td>+ 11:33</td>
+    </tr>
+    <tr>
+      <td>153</td>
+      <td></td>
+      <td></td>
+      <td>Malucelli Matteo</td>
+      <td>XDS Astana Team</td>
+      <td></td>
+      <td>+ 11:33</td>
+    </tr>
+    <tr>
+      <td>154</td>
+      <td></td>
+      <td></td>
+      <td>Blikra Erlend</td>
+      <td>Uno-X Mobility</td>
+      <td></td>
+      <td>+ 11:33</td>
+    </tr>
+    <tr>
+      <td>155</td>
+      <td></td>
+      <td></td>
+      <td>De Lie Arnaud</td>
+      <td>Lotto-Intermarché</td>
+      <td></td>
+      <td>+ 11:33</td>
+    </tr>
+    <tr>
+      <td>156</td>
+      <td></td>
+      <td></td>
+      <td>Planckaert Edward</td>
+      <td>Alpecin-Premier Tech</td>
+      <td></td>
+      <td>+ 11:33</td>
+    </tr>
+    <tr>
+      <td>157</td>
+      <td></td>
+      <td></td>
+      <td>Menten Milan</td>
+      <td>Lotto-Intermarché</td>
+      <td></td>
+      <td>+ 11:33</td>
+    </tr>
+    <tr>
+      <td>158</td>
+      <td></td>
+      <td></td>
+      <td>Flynn Sean</td>
+      <td>Team Picnic PostNL</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>159</td>
+      <td></td>
+      <td></td>
+      <td>Naberman Tim</td>
+      <td>Team Picnic PostNL</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>160</td>
+      <td></td>
+      <td></td>
+      <td>Hamilton Chris</td>
+      <td>Team Picnic PostNL</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>161</td>
+      <td></td>
+      <td></td>
+      <td>Mullen Ryan</td>
+      <td>NSN Cycling Team</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>162</td>
+      <td></td>
+      <td></td>
+      <td>Rochas Rémy</td>
+      <td>Groupama-FDJ United</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>163</td>
+      <td></td>
+      <td></td>
+      <td>van Uden Casper</td>
+      <td>Team Picnic PostNL</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>164</td>
+      <td></td>
+      <td></td>
+      <td>Groves Kaden</td>
+      <td>Alpecin-Premier Tech</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>165</td>
+      <td></td>
+      <td></td>
+      <td>Geens Jonas</td>
+      <td>Alpecin-Premier Tech</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>166</td>
+      <td></td>
+      <td></td>
+      <td>Bais Mattia</td>
+      <td>Team Polti VisitMalta</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>167</td>
+      <td></td>
+      <td></td>
+      <td>van den Broek Frank</td>
+      <td>Team Picnic PostNL</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>168</td>
+      <td></td>
+      <td></td>
+      <td>Giddings Joshua</td>
+      <td>Lotto-Intermarché</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>169</td>
+      <td></td>
+      <td></td>
+      <td>Shaw James</td>
+      <td>EF Education-EasyPost</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>170</td>
+      <td></td>
+      <td></td>
+      <td>Yates Adam</td>
+      <td>UAE Team Emirates-XRG</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>171</td>
+      <td></td>
+      <td></td>
+      <td>Walscheid Max</td>
+      <td>Lidl-Trek</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>172</td>
+      <td></td>
+      <td></td>
+      <td>Cavagna Remi</td>
+      <td>Groupama-FDJ United</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>173</td>
+      <td></td>
+      <td></td>
+      <td>Van Der Lee Jardi</td>
+      <td>EF Education-EasyPost</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>174</td>
+      <td></td>
+      <td></td>
+      <td>Kelderman Wilco</td>
+      <td>Team Visma | Lease a Bike</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>175</td>
+      <td></td>
+      <td></td>
+      <td>Rex Tim</td>
+      <td>Team Visma | Lease a Bike</td>
+      <td></td>
+      <td>+ 13:46</td>
+    </tr>
+    <tr>
+      <td>176</td>
+      <td></td>
+      <td></td>
+      <td>Battistella Samuele</td>
+      <td>EF Education-EasyPost</td>
+      <td></td>
+      <td>+ 16:46</td>
+    </tr>
+    <tr>
+      <td>177</td>
+      <td></td>
+      <td></td>
+      <td>Smith Dion</td>
+      <td>NSN Cycling Team</td>
+      <td></td>
+      <td>+ 17:30</td>
+    </tr>
+    <tr>
+      <td>178</td>
+      <td></td>
+      <td></td>
+      <td>Stewart Jake</td>
+      <td>NSN Cycling Team</td>
+      <td></td>
+      <td>+ 17:30</td>
+    </tr>
+    <tr>
+      <td>179</td>
+      <td></td>
+      <td></td>
+      <td>Vendrame Andrea</td>
+      <td>Team Jayco-AlUla</td>
+      <td></td>
+      <td>+ 17:30</td>
+    </tr>
+    <tr>
+      <td>DNS</td>
+      <td></td>
+      <td></td>
+      <td>Moschetti Matteo</td>
+      <td>Pinarello-Q36.5 Pro Cycling Team</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>DNF</td>
+      <td></td>
+      <td></td>
+      <td>Buitrago Santiago</td>
+      <td>Bahrain Victorious</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>DNF</td>
+      <td></td>
+      <td></td>
+      <td>Soler Marc</td>
+      <td>UAE Team Emirates-XRG</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>DNF</td>
+      <td></td>
+      <td></td>
+      <td>Vine Jay</td>
+      <td>UAE Team Emirates-XRG</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>DNF</td>
+      <td></td>
+      <td></td>
+      <td>Holter Ådne</td>
+      <td>Uno-X Mobility</td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table></div>
+      </section>
+
+      <section class="card">
+        <h2>Overall GC</h2>
+        <div class="scroll"><table class="dataframe table">
+  <thead>
+    <tr style="text-align: right;">
+      <th>Pos</th>
+      <th>Unnamed: 1</th>
+      <th>Unnamed: 2</th>
+      <th>Rider</th>
+      <th>Team</th>
+      <th>Unnamed: 5</th>
+      <th>Time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>DNF</td>
+      <td></td>
+      <td></td>
+      <td>Buitrago Santiago</td>
+      <td>Bahrain Victorious</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>DNF</td>
+      <td></td>
+      <td></td>
+      <td>Moschetti Matteo</td>
+      <td>Pinarello-Q36.5 Pro Cycling Team</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>DNF</td>
+      <td></td>
+      <td></td>
+      <td>Soler Marc</td>
+      <td>UAE Team Emirates-XRG</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>DNF</td>
+      <td></td>
+      <td></td>
+      <td>Vine Jay</td>
+      <td>UAE Team Emirates-XRG</td>
+      <td></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td>DNF</td>
+      <td></td>
+      <td></td>
+      <td>Holter Ådne</td>
+      <td>Uno-X Mobility</td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table></div>
+      </section>
+    </div>
+
+    <div class="note">
+      Data is copied from FirstCycling tables (MVP). Predictions and richer visuals can be layered on later.
+    </div>
+  </div>
+</body>
+</html>
