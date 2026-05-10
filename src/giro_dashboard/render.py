@@ -149,7 +149,7 @@ def render_dashboard(
         <span><a href="{p_link}" rel="noreferrer" target="_blank">Stage page (FirstCycling)</a></span>
       </div>
       <div class="profile-img-wrap">
-        <img src="{p_src}" alt="{p_alt}" loading="lazy" decoding="async" />
+        <img src="{p_src}" alt="{p_alt}" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
       </div>
     </section>
 """
