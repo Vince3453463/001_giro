@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
 import pandas as pd
+
+from giro_dashboard.parse_reddit_predictions import RedditPredictionsContent, plain_text_preview
 
 
 @dataclass(frozen=True)
@@ -11,9 +14,15 @@ class RenderContext:
     title: str
     stage_url: str
     race_url: str
+    stage_number: int
     generated_at_utc: datetime
     odds_url: str | None = None
     odds_market_title: str | None = None
+    odds_note: str | None = None
+    profile_image_url: str | None = None
+    profile_page_url: str | None = None
+    profile_stage_number: int | None = None
+    reddit_pick_legend: bool = False
 
 
 def _escape_html(s: str) -> str:
@@ -41,12 +50,84 @@ def _df_to_html_table(df: pd.DataFrame, *, table_id: str) -> str:
     return f'<table id="{_escape_html(table_id)}" class="table" border="0">{thead}{tbody}</table>'
 
 
+def _reddit_markdown_to_html(md: str) -> str:
+    raw = md or ""
+    try:
+        import markdown as md_lib
+
+        html = md_lib.markdown(raw, extensions=["tables", "nl2br"])
+    except Exception:
+        return '<pre class="reddit-md reddit-fallback">' + _escape_html(raw) + "</pre>"
+    html = re.sub(r'href="/', 'href="https://www.reddit.com/', html)
+    html = re.sub(r"href='/", "href='https://www.reddit.com/", html)
+    return html
+
+
+def _render_reddit_predictions_section(content: RedditPredictionsContent | None) -> str:
+    if content is None:
+        return ""
+
+    pl = _escape_html(content.permalink)
+    tt = _escape_html(content.thread_title)
+
+    if not content.success:
+        err = _escape_html(content.error_note or "Information could not be found.")
+        return f"""
+    <section class="card reddit-thread-card" style="margin-top: 14px;">
+      <h2>r/peloton — predictions thread</h2>
+      <div class="meta" style="margin-bottom: 8px;"><span><a href="{pl}" rel="noreferrer" target="_blank">Open on Reddit</a></span></div>
+      <p class="note">{err}</p>
+    </section>
+"""
+
+    blocks: list[str] = [
+        f"""
+    <section class="card reddit-thread-card" style="margin-top: 14px;">
+      <h2>r/peloton — predictions thread</h2>
+      <div class="meta" style="margin-bottom: 8px;">
+        <span><strong>{tt}</strong></span>
+        <span><a href="{pl}" rel="noreferrer" target="_blank">Open on Reddit</a></span>
+      </div>
+"""
+    ]
+
+    if content.intro_md.strip():
+        blocks.append(f'<div class="reddit-md reddit-intro">{_reddit_markdown_to_html(content.intro_md)}</div>')
+
+    for i, sec in enumerate(content.sections):
+        title_esc = _escape_html(sec.title)
+        body_html = _reddit_markdown_to_html(sec.body_md)
+        if sec.expandable:
+            preview = _escape_html(plain_text_preview(sec.body_md))
+            blocks.append(f"""
+      <div class="reddit-section-block">
+        <h3 class="reddit-h3">{title_esc}</h3>
+        <div class="reddit-expand" id="reddit-expand-{i}">
+          <p class="reddit-preview">{preview}</p>
+          <div class="reddit-full reddit-md" hidden>{body_html}</div>
+          <button type="button" class="btn" onclick="toggleRedditExpand(this)">Expand</button>
+        </div>
+      </div>
+""")
+        else:
+            blocks.append(f"""
+      <div class="reddit-section-block">
+        <h3 class="reddit-h3">{title_esc}</h3>
+        <div class="reddit-md">{body_html}</div>
+      </div>
+""")
+
+    blocks.append("    </section>\n")
+    return "".join(blocks)
+
+
 def render_dashboard(
     *,
     ctx: RenderContext,
     stage_df: pd.DataFrame,
     gc_df: pd.DataFrame,
     odds_df: pd.DataFrame | None = None,
+    reddit_content: RedditPredictionsContent | None = None,
 ) -> str:
     generated = ctx.generated_at_utc.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     stage_table_id = "stageTable"
@@ -55,6 +136,25 @@ def render_dashboard(
     stage_html = _df_to_html_table(stage_df, table_id=stage_table_id)
     gc_html = _df_to_html_table(gc_df, table_id=gc_table_id)
     odds_html = _df_to_html_table(odds_df, table_id=odds_table_id) if odds_df is not None else ""
+
+    profile_block = ""
+    if ctx.profile_image_url and ctx.profile_stage_number is not None:
+        p_src = _escape_html(ctx.profile_image_url)
+        p_alt = _escape_html(f"Stage {ctx.profile_stage_number} profile (FirstCycling)")
+        p_link = _escape_html(ctx.profile_page_url or "")
+        profile_block = f"""
+    <section class="card" style="margin-top: 14px;">
+      <h2>Next stage profile — Stage {ctx.profile_stage_number}</h2>
+      <div class="meta" style="margin-bottom: 8px;">
+        <span><a href="{p_link}" rel="noreferrer" target="_blank">Stage page (FirstCycling)</a></span>
+      </div>
+      <div class="profile-img-wrap">
+        <img src="{p_src}" alt="{p_alt}" loading="lazy" decoding="async" />
+      </div>
+    </section>
+"""
+
+    reddit_block = _render_reddit_predictions_section(reddit_content)
 
     return f"""<!doctype html>
 <html lang="en">
@@ -80,6 +180,10 @@ def render_dashboard(
         --muted: rgba(13,19,33,0.70);
         --border: rgba(13,19,33,0.16);
         --accent: #2f5bff;
+      }}
+      .btn.btn-active {{
+        background: rgba(40, 170, 80, 0.18);
+        border-color: rgba(30, 140, 65, 0.42);
       }}
     }}
     body {{
@@ -170,6 +274,64 @@ def render_dashboard(
     .scroll {{
       overflow-x: auto;
     }}
+    .profile-img-wrap {{
+      margin-top: 8px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.10);
+    }}
+    .profile-img-wrap img {{
+      display: block;
+      width: 100%;
+      height: auto;
+      vertical-align: middle;
+    }}
+    .reddit-thread-card .reddit-intro {{
+      margin-bottom: 12px;
+    }}
+    .reddit-section-block {{
+      margin-top: 14px;
+    }}
+    .reddit-h3 {{
+      margin: 0 0 8px;
+      font-size: 15px;
+      font-weight: 600;
+    }}
+    .reddit-md {{
+      font-size: 13px;
+      line-height: 1.45;
+      overflow-x: auto;
+    }}
+    .reddit-md table {{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin: 10px 0;
+    }}
+    .reddit-md th, .reddit-md td {{
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }}
+    .reddit-md pre {{
+      overflow-x: auto;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.12);
+    }}
+    .reddit-preview {{
+      color: var(--muted);
+      margin: 0 0 8px;
+      white-space: pre-wrap;
+      font-size: 13px;
+      line-height: 1.45;
+    }}
+    .reddit-expand .btn {{
+      margin-top: 4px;
+    }}
     .controls {{
       display: flex;
       gap: 10px;
@@ -186,7 +348,16 @@ def render_dashboard(
       font-size: 12px;
       cursor: pointer;
     }}
-    .btn:disabled {{
+    .btn.btn-active {{
+      background: rgba(120, 220, 140, 0.26);
+      border-color: rgba(90, 200, 120, 0.55);
+      font-weight: 600;
+    }}
+    .btn.btn-active:disabled {{
+      opacity: 1;
+      cursor: default;
+    }}
+    .btn:disabled:not(.btn-active) {{
       opacity: 0.55;
       cursor: default;
     }}
@@ -210,11 +381,28 @@ def render_dashboard(
       if (!wrap) return;
       const expandBtn = wrap.querySelector("[data-action='expand']");
       const collapseBtn = wrap.querySelector("[data-action='collapse']");
-      if (expandBtn) expandBtn.disabled = (limit === null);
-      if (collapseBtn) collapseBtn.disabled = (limit !== null);
+      if (expandBtn) {{
+        expandBtn.disabled = (limit === null);
+        expandBtn.classList.toggle("btn-active", limit === null);
+      }}
+      if (collapseBtn) {{
+        collapseBtn.disabled = (limit !== null);
+        collapseBtn.classList.toggle("btn-active", limit !== null);
+      }}
     }}
     function expandTable(tableId) {{ setTableLimit(tableId, null); }}
     function collapseTable(tableId, limit) {{ setTableLimit(tableId, limit); }}
+    function toggleRedditExpand(btn) {{
+      const wrap = btn.closest(".reddit-expand");
+      if (!wrap) return;
+      const expanded = wrap.classList.toggle("expanded");
+      const preview = wrap.querySelector(".reddit-preview");
+      const full = wrap.querySelector(".reddit-full");
+      if (preview) preview.hidden = expanded;
+      if (full) full.hidden = !expanded;
+      btn.textContent = expanded ? "Show less" : "Expand";
+      btn.classList.toggle("btn-active", expanded);
+    }}
     window.addEventListener("DOMContentLoaded", () => {{
       collapseTable("{stage_table_id}", 10);
       collapseTable("{gc_table_id}", 10);
@@ -230,14 +418,15 @@ def render_dashboard(
       <h1>{ctx.title}</h1>
       <div class="meta">
         <span><strong>Updated</strong>: {generated}</span>
-        <span><a href="{ctx.stage_url}" rel="noreferrer" target="_blank">Stage source</a></span>
+        <span><strong>Stage results</strong>: Stage {ctx.stage_number}</span>
+        <span><a href="{ctx.stage_url}" rel="noreferrer" target="_blank">Stage source (FirstCycling)</a></span>
         <span><a href="{ctx.race_url}" rel="noreferrer" target="_blank">Race source</a></span>
       </div>
     </header>
 
     <div class="grid">
       <section class="card">
-        <h2>Stage results</h2>
+        <h2>Stage results — Stage {ctx.stage_number}</h2>
         <div data-table-wrap class="scroll">
           <div class="controls">
             <button class="btn" data-action="expand" onclick="expandTable('{stage_table_id}')">Show full</button>
@@ -266,6 +455,8 @@ def render_dashboard(
       <div class="meta" style="margin-bottom: 8px;">
         {f'<span><a href=\"{ctx.odds_url}\" rel=\"noreferrer\" target=\"_blank\">Odds source</a></span>' if ctx.odds_url else ''}
         {f'<span>{_escape_html(ctx.odds_market_title)}</span>' if ctx.odds_market_title else ''}
+        {f'<span>{_escape_html("Pick: ★ from r/peloton thread, matched to riders by surname (accent/spelling tolerant).")}</span>' if ctx.reddit_pick_legend else ''}
+        {f'<span>{_escape_html(ctx.odds_note)}</span>' if ctx.odds_note else ''}
       </div>
       <div data-table-wrap class="scroll">
         <div class="controls">
@@ -276,7 +467,7 @@ def render_dashboard(
         {odds_html if odds_df is not None else '<div class=\"note\">Odds not available.</div>'}
       </div>
     </section>
-
+{profile_block}{reddit_block}
     <div class="note">
       Data is copied from FirstCycling tables (MVP). Predictions and richer visuals can be layered on later.
     </div>

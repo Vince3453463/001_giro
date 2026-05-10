@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Giro d'Italia 2026 — dashboard (MVP)</title>
+  <title>Giro d'Italia 2026 — Stage 2</title>
   <style>
     :root {
       color-scheme: light dark;
@@ -22,6 +22,10 @@
         --muted: rgba(13,19,33,0.70);
         --border: rgba(13,19,33,0.16);
         --accent: #2f5bff;
+      }
+      .btn.btn-active {
+        background: rgba(40, 170, 80, 0.18);
+        border-color: rgba(30, 140, 65, 0.42);
       }
     }
     body {
@@ -112,6 +116,64 @@
     .scroll {
       overflow-x: auto;
     }
+    .profile-img-wrap {
+      margin-top: 8px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.10);
+    }
+    .profile-img-wrap img {
+      display: block;
+      width: 100%;
+      height: auto;
+      vertical-align: middle;
+    }
+    .reddit-thread-card .reddit-intro {
+      margin-bottom: 12px;
+    }
+    .reddit-section-block {
+      margin-top: 14px;
+    }
+    .reddit-h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .reddit-md {
+      font-size: 13px;
+      line-height: 1.45;
+      overflow-x: auto;
+    }
+    .reddit-md table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin: 10px 0;
+    }
+    .reddit-md th, .reddit-md td {
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+    .reddit-md pre {
+      overflow-x: auto;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.12);
+    }
+    .reddit-preview {
+      color: var(--muted);
+      margin: 0 0 8px;
+      white-space: pre-wrap;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .reddit-expand .btn {
+      margin-top: 4px;
+    }
     .controls {
       display: flex;
       gap: 10px;
@@ -128,7 +190,16 @@
       font-size: 12px;
       cursor: pointer;
     }
-    .btn:disabled {
+    .btn.btn-active {
+      background: rgba(120, 220, 140, 0.26);
+      border-color: rgba(90, 200, 120, 0.55);
+      font-weight: 600;
+    }
+    .btn.btn-active:disabled {
+      opacity: 1;
+      cursor: default;
+    }
+    .btn:disabled:not(.btn-active) {
       opacity: 0.55;
       cursor: default;
     }
@@ -152,11 +223,28 @@
       if (!wrap) return;
       const expandBtn = wrap.querySelector("[data-action='expand']");
       const collapseBtn = wrap.querySelector("[data-action='collapse']");
-      if (expandBtn) expandBtn.disabled = (limit === null);
-      if (collapseBtn) collapseBtn.disabled = (limit !== null);
+      if (expandBtn) {
+        expandBtn.disabled = (limit === null);
+        expandBtn.classList.toggle("btn-active", limit === null);
+      }
+      if (collapseBtn) {
+        collapseBtn.disabled = (limit !== null);
+        collapseBtn.classList.toggle("btn-active", limit !== null);
+      }
     }
     function expandTable(tableId) { setTableLimit(tableId, null); }
     function collapseTable(tableId, limit) { setTableLimit(tableId, limit); }
+    function toggleRedditExpand(btn) {
+      const wrap = btn.closest(".reddit-expand");
+      if (!wrap) return;
+      const expanded = wrap.classList.toggle("expanded");
+      const preview = wrap.querySelector(".reddit-preview");
+      const full = wrap.querySelector(".reddit-full");
+      if (preview) preview.hidden = expanded;
+      if (full) full.hidden = !expanded;
+      btn.textContent = expanded ? "Show less" : "Expand";
+      btn.classList.toggle("btn-active", expanded);
+    }
     window.addEventListener("DOMContentLoaded", () => {
       collapseTable("stageTable", 10);
       collapseTable("gcTable", 10);
@@ -169,17 +257,18 @@
 <body>
   <div class="wrap">
     <header>
-      <h1>Giro d'Italia 2026 — dashboard (MVP)</h1>
+      <h1>Giro d'Italia 2026 — Stage 2</h1>
       <div class="meta">
-        <span><strong>Updated</strong>: 2026-05-10 15:07 UTC</span>
-        <span><a href="https://firstcycling.com/race.php?r=13&y=2026&e=02" rel="noreferrer" target="_blank">Stage source</a></span>
+        <span><strong>Updated</strong>: 2026-05-10 16:34 UTC</span>
+        <span><strong>Stage results</strong>: Stage 2</span>
+        <span><a href="https://firstcycling.com/race.php?r=13&y=2026&e=02" rel="noreferrer" target="_blank">Stage source (FirstCycling)</a></span>
         <span><a href="https://firstcycling.com/race.php?r=13&y=2026" rel="noreferrer" target="_blank">Race source</a></span>
       </div>
     </header>
 
     <div class="grid">
       <section class="card">
-        <h2>Stage results</h2>
+        <h2>Stage results — Stage 2</h2>
         <div data-table-wrap class="scroll">
           <div class="controls">
             <button class="btn" data-action="expand" onclick="expandTable('stageTable')">Show full</button>
@@ -208,6 +297,8 @@
       <div class="meta" style="margin-bottom: 8px;">
         <span><a href="https://www.oddschecker.com/cycling/giro-ditalia/giro-ditalia-stage-3/winner" rel="noreferrer" target="_blank">Odds source</a></span>
         <span>Giro dItalia - Stage 3 Winner</span>
+        <span>Pick: ★ from r/peloton thread, matched to riders by surname (accent/spelling tolerant).</span>
+        <span>Decimal odds from William Hill only (single sportsbook column; exchanges excluded).</span>
       </div>
       <div data-table-wrap class="scroll">
         <div class="controls">
@@ -215,7 +306,134 @@
           <button class="btn" data-action="collapse" onclick="collapseTable('oddsTable', 10)">Show top 10</button>
           <span class="count">Default: top 10</span>
         </div>
-        <table id="oddsTable" class="table" border="0"><thead><tr><th>Rider</th><th>Decimal</th><th>Bookmaker</th><th>Source</th></tr></thead><tbody><tr data-idx="0"><td>Jonathan Milan</td><td>2.2</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="1"><td>Paul Magnier</td><td>3.25</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="2"><td>Andrea Vendrame</td><td>5.9</td><td></td><td>Oddschecker</td></tr><tr data-idx="3"><td>Tobias Lund Andresen</td><td>7.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="4"><td>Dylan Groenewegen</td><td>9.0</td><td>BetMGM UK, 10bet</td><td>Oddschecker</td></tr><tr data-idx="5"><td>Matteo Malucelli</td><td>21.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="6"><td>Ethan Vernon</td><td>26.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="7"><td>Diego Pablo Sevilla</td><td>34.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="8"><td>Erlend Blikra</td><td>51.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="9"><td>Kaden Groves</td><td>51.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="10"><td>Casper Van Uden</td><td>67.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="11"><td>Manuele Tarozzi</td><td>67.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="12"><td>Arnaud De Lie</td><td>81.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="13"><td>Ben Turner</td><td>81.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="14"><td>Pascal Ackermann</td><td>81.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="15"><td>Madis Mihkels</td><td>101.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="16"><td>Orluis Aular</td><td>126.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="17"><td>Corbin Strong</td><td>151.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="18"><td>Filippo Ganna</td><td>151.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="19"><td>Guillermo Thomas Silva</td><td>151.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="20"><td>Jake Stewart</td><td>151.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="21"><td>Giovanni Lonardi</td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="22"><td>Ivan Garcia Cortina</td><td>201.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="23"><td>Jasper Stuyven</td><td>201.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="24"><td>Jensen Plowright</td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="25"><td>Lukas Kubis</td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="26"><td>Paul Penhoet</td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="27"><td>Alberto Bettiol</td><td>251.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="28"><td>Andreas Leknessund</td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="29"><td>Christian Scaroni</td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="30"><td>Davide Ballerini</td><td>251.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="31"><td>Edoardo Zambanini</td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="32"><td>Florian Stork</td><td>251.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="33"><td>Frederik Dversnes</td><td>251.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="34"><td>Giulio Ciccone</td><td>251.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="35"><td>Jhonatan Narvaez</td><td>251.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="36"><td>Lennert Van Eetvelt</td><td>251.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="37"><td>Lorenzo Milesi</td><td>251.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="38"><td>Luca Mozzato</td><td>251.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="39"><td>Martin Marcellusi</td><td>251.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="40"><td>Matyas Kopecky</td><td>251.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="41"><td>Milan Menten</td><td>251.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="42"><td>Thomas Pesenti</td><td>251.0</td><td>William Hill, 10bet</td><td>Oddschecker</td></tr><tr data-idx="43"><td>Tim Torn Teutenberg</td><td>251.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="44"><td>Warren Barguil</td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="45"><td>Alec Segaert</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="46"><td>Antonio Morgado</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="47"><td>Axel Huens</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="48"><td>Diego Ulissi</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="49"><td>Edward Planckaert</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="50"><td>Fabio Christen</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="51"><td>Jan Christen</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="52"><td>Jonas Rutsch</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="53"><td>Ludovico Crescioli</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="54"><td>Mirco Maestri</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="55"><td>Nico Denz</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="56"><td>Robert Stannard</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="57"><td>Sakarias Koller Loland</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="58"><td>Simone Gualdi</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="59"><td>Timo Kielich</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="60"><td>Toon Aerts</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="61"><td>Tord Gudmestad</td><td>301.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="62"><td>Andrea Raccagni</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="63"><td>David Gonzalez</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="64"><td>Felix Engelhardt</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="65"><td>Filippo Magli</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="66"><td>Francesco Busatto</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="67"><td>Gianmarco Garofoli</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="68"><td>Koen Bouwman</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="69"><td>Luca Paletti</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="70"><td>Magnus Sheffield</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="71"><td>Matteo Sobrero</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="72"><td>Mattia Bais</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="73"><td>Nikita Tsvetkov</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="74"><td>Niklas Larsen</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="75"><td>Remi Cavagna</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="76"><td>Samuele Battistella</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="77"><td>Victor Campenaerts</td><td>401.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="78"><td>Robert Donaldson</td><td>501.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="79"><td>Timo De Jong</td><td>501.0</td><td>10bet</td><td>Oddschecker</td></tr><tr data-idx="80"><td>Michael Valgren</td><td>601.0</td><td>10bet</td><td>Oddschecker</td></tr></tbody></table>
+        <table id="oddsTable" class="table" border="0"><thead><tr><th>Rider</th><th>Pick</th><th>Decimal</th><th>Bookmaker</th><th>Source</th></tr></thead><tbody><tr data-idx="0"><td>Jonathan Milan</td><td>★</td><td>2.2</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="1"><td>Paul Magnier</td><td>★★★</td><td>3.25</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="2"><td>Tobias Lund Andresen</td><td>★★</td><td>7.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="3"><td>Dylan Groenewegen</td><td>★</td><td>8.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="4"><td>Diego Pablo Sevilla</td><td></td><td>9.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="5"><td>Manuele Tarozzi</td><td></td><td>13.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="6"><td>Matteo Malucelli</td><td></td><td>17.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="7"><td>Ethan Vernon</td><td>★</td><td>26.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="8"><td>Casper Van Uden</td><td></td><td>41.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="9"><td>Erlend Blikra</td><td></td><td>41.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="10"><td>Kaden Groves</td><td>★</td><td>41.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="11"><td>Arnaud De Lie</td><td>★</td><td>81.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="12"><td>Ben Turner</td><td></td><td>81.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="13"><td>Pascal Ackermann</td><td></td><td>81.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="14"><td>Filippo Ganna</td><td></td><td>101.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="15"><td>Madis Mihkels</td><td></td><td>101.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="16"><td>Orluis Aular</td><td></td><td>126.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="17"><td>Corbin Strong</td><td></td><td>151.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="18"><td>David Gonzalez</td><td></td><td>151.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="19"><td>Davide Ballerini</td><td></td><td>151.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="20"><td>Guillermo Thomas Silva</td><td></td><td>151.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="21"><td>Jake Stewart</td><td></td><td>151.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="22"><td>Jasper Stuyven</td><td></td><td>151.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="23"><td>Alec Segaert</td><td></td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="24"><td>Felix Engelhardt</td><td></td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="25"><td>Giovanni Lonardi</td><td></td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="26"><td>Ivan Garcia Cortina</td><td></td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="27"><td>Jensen Plowright</td><td></td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="28"><td>Jhonatan Narvaez</td><td></td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="29"><td>Lorenzo Milesi</td><td></td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="30"><td>Lukas Kubis</td><td></td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="31"><td>Paul Penhoet</td><td></td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="32"><td>Sakarias Koller Loland</td><td></td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="33"><td>Tim Torn Teutenberg</td><td></td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="34"><td>Tord Gudmestad</td><td></td><td>201.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="35"><td>Alberto Bettiol</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="36"><td>Andrea Raccagni</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="37"><td>Andreas Leknessund</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="38"><td>Antonio Morgado</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="39"><td>Axel Huens</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="40"><td>Christian Scaroni</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="41"><td>Diego Ulissi</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="42"><td>Edoardo Zambanini</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="43"><td>Edward Planckaert</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="44"><td>Fabio Christen</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="45"><td>Filippo Magli</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="46"><td>Florian Stork</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="47"><td>Francesco Busatto</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="48"><td>Frederik Dversnes</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="49"><td>Gianmarco Garofoli</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="50"><td>Giulio Ciccone</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="51"><td>Jan Christen</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="52"><td>Jonas Rutsch</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="53"><td>Koen Bouwman</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="54"><td>Lennert Van Eetvelt</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="55"><td>Luca Mozzato</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="56"><td>Luca Paletti</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="57"><td>Ludovico Crescioli</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="58"><td>Magnus Sheffield</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="59"><td>Martin Marcellusi</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="60"><td>Matteo Sobrero</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="61"><td>Mattia Bais</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="62"><td>Matyas Kopecky</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="63"><td>Michael Valgren</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="64"><td>Milan Menten</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="65"><td>Mirco Maestri</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="66"><td>Nico Denz</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="67"><td>Nikita Tsvetkov</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="68"><td>Niklas Larsen</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="69"><td>Remi Cavagna</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="70"><td>Robert Donaldson</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="71"><td>Robert Stannard</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="72"><td>Samuele Battistella</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="73"><td>Simone Gualdi</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="74"><td>Thomas Pesenti</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="75"><td>Timo De Jong</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="76"><td>Timo Kielich</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="77"><td>Toon Aerts</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="78"><td>Victor Campenaerts</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr><tr data-idx="79"><td>Warren Barguil</td><td></td><td>251.0</td><td>William Hill</td><td>Oddschecker</td></tr></tbody></table>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top: 14px;">
+      <h2>Next stage profile — Stage 3</h2>
+      <div class="meta" style="margin-bottom: 8px;">
+        <span><a href="https://firstcycling.com/race.php?r=13&amp;y=2026&amp;e=03" rel="noreferrer" target="_blank">Stage page (FirstCycling)</a></span>
+      </div>
+      <div class="profile-img-wrap">
+        <img src="https://firstcycling.com/img/ritt_etapper/2026_13_3.jpg" alt="Stage 3 profile (FirstCycling)" loading="lazy" decoding="async" />
+      </div>
+    </section>
+
+    <section class="card reddit-thread-card" style="margin-top: 14px;">
+      <h2>r/peloton — predictions thread</h2>
+      <div class="meta" style="margin-bottom: 8px;">
+        <span><strong>[Predictions Thread] 2026 Giro d&#39;Italia Stage 3: Plovdiv &amp;gt; Sofia</strong></span>
+        <span><a href="https://www.reddit.com/r/peloton/comments/1t8cnsw/predictions_thread_2026_giro_ditalia_stage_3" rel="noreferrer" target="_blank">Open on Reddit</a></span>
+      </div>
+<div class="reddit-md reddit-intro"><h3>2026 Giro d'Italia Stage 3: Plovdiv &gt; Sofia</h3></div>
+      <div class="reddit-section-block">
+        <h3 class="reddit-h3">Stage info</h3>
+        <div class="reddit-md"><table>
+<thead>
+<tr>
+<th>Date</th>
+<th>Stage</th>
+<th>Route</th>
+<th>Length</th>
+<th>Type</th>
+<th>Altitude</th>
+<th>Finish</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sun. 10/05</td>
+<td><a href="https://www.giroditalia.it/en/tappe/stage-3-of-the-giro-ditalia-2026-plovdiv-sofia/">3</a></td>
+<td><a href="https://static2.giroditalia.it/wp-content/uploads/2026/04/t9Jk56CKxiTYTDZXhcSi_140426-013843.jpg">Plovdiv &gt; Sofia</a></td>
+<td>175 km</td>
+<td><a href="https://static2.giroditalia.it/wp-content/uploads/2026/04/bUGri5dr1hGsYTmK8PXd_140426-014008.jpg">Easy</a></td>
+<td>1657m</td>
+<td><a href="https://static2.giroditalia.it/wp-content/uploads/2026/04/MHbTliKHrgLDzfWcXmYb_140426-014224.jpg">Flattish</a></td>
+<td>13:15-17:15 CET</td>
+</tr>
+</tbody>
+</table></div>
+      </div>
+
+      <div class="reddit-section-block">
+        <h3 class="reddit-h3">Climbs</h3>
+        <div class="reddit-md"><table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Cat</th>
+<th>Km</th>
+<th>Length</th>
+<th>Avg</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Borovets Pass</td>
+<td>2</td>
+<td>km 103.2</td>
+<td>9.2 km</td>
+<td>5.4 %</td>
+</tr>
+</tbody>
+</table></div>
+      </div>
+
+      <div class="reddit-section-block">
+        <h3 class="reddit-h3">Sprints</h3>
+        <div class="reddit-md"><table>
+<thead>
+<tr>
+<th>Location</th>
+<th>Km</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dolna Banja</td>
+<td>km 85.8</td>
+</tr>
+<tr>
+<td>Red Bull Km</td>
+<td>km 162.0</td>
+</tr>
+</tbody>
+</table></div>
+      </div>
+
+      <div class="reddit-section-block">
+        <h3 class="reddit-h3">Weather</h3>
+        <div class="reddit-md"><p>Between 15°C and 20°C. Sunny, slightly overcast.</p>
+<hr /></div>
+      </div>
+
+      <div class="reddit-section-block">
+        <h3 class="reddit-h3">Stage breakdown</h3>
+        <div class="reddit-expand" id="reddit-expand-4">
+          <p class="reddit-preview">Tomorrow’s stage, the last part of our Bulgarian adventure, will link the two largest cities in the country. We will see the first cat 2 climb of the race, which will bring the peloton above 1,000 m of altitude for the first time. Don’t get too excited, however, as this all happens far away from the finish line, where we are likely to witness a sprint finish instead. Plovdiv seems like a perfect fit for the Giro:…</p>
+          <div class="reddit-full reddit-md" hidden><p>Tomorrow’s stage, the last part of our Bulgarian adventure, will link the two largest cities in the country. We will see the first cat 2 climb of the race, which will bring the peloton above 1,000 m of altitude for the first time. Don’t get too excited, however, as this all happens far away from the finish line, where we are likely to witness a sprint finish instead.</p>
+<p>Plovdiv seems like a perfect fit for the Giro: it’s a city with important Roman heritage, home to some of the best preserved archaeological sites in the Balkans- the Roman theatre is especially famous. It is located in the inner part of the Thracian plain, so once again the first part of the stage will be almost entirely flat- or rather rising with the gentlest of gradients towards the hills. The intermediate sprint in Dolna Banja coming at 90 kms to go marks the beginning of the lone KOM of the day, the Borovec (or Borovets) Pass, a 10-kms long climb towards a small ski station with regular gradients between 5% and 6% for most of the climb. To keep up with the Roman theme, on the other side of the mountain lies Razlog, a town that used to host a minor UCI stage race named “In the footsteps of the Romans”, last held in 2024.</p>
+<p>From the summit, the riders will turn northwest and start a long, gradual descent towards Sofia. The suburb of Pancharevo, just outside the capital’s outer belt, will host the Red Bull km with 13 kms to go. The last 8 kms take place along the Tsarigradsko Shose (“Constantinople Boulevard”), an entirely straight, wide boulevard, leading from the commercial districts in the outskirts of Sofia to the inner city. In the last km, after crossing the Orlov Most (“Eagles Bridge”, a famous landmark), the road turns very gently to the left towards the finish line, located one block from the Nevskiy Cathedral, another one of Sofia’s most iconic buildings.</p>
+<p>With all this in mind, here are our predictions for tomorrow's stage:</p>
+<p>★★★ Magnier</p>
+<p>★★ Andresen</p>
+<p>★ De Lie, Groenewegen, Groves, Milan, Vernon</p></div>
+          <button type="button" class="btn" onclick="toggleRedditExpand(this)">Expand</button>
+        </div>
+      </div>
+
+      <div class="reddit-section-block">
+        <h3 class="reddit-h3">Rider discussion</h3>
+        <div class="reddit-expand" id="reddit-expand-5">
+          <p class="reddit-preview">Tomorrow&#39;s stage will probably end in a sprint again- we don&#39;t think there will be a strong breakaway with a relatively meager amount of KOM points on offer and with a stage finale that seems quite stacked in favour of the big sprinting trains. Following the events of Stage 1, we&#39;ve placed **Paul Magnier** as the top pick and **Tobias Lund Andresen** as our second-best guess. They both impressed, Magnier seems to…</p>
+          <div class="reddit-full reddit-md" hidden><p>Tomorrow's stage will probably end in a sprint again- we don't think there will be a strong breakaway with a relatively meager amount of KOM points on offer and with a stage finale that seems quite stacked in favour of the big sprinting trains.</p>
+<p>Following the events of Stage 1, we've placed <strong>Paul Magnier</strong> as the top pick and <strong>Tobias Lund Andresen</strong> as our second-best guess. They both impressed, Magnier seems to have a bit of an edge on speed on a pure flat sprint but Andresen was very close, plus he has a solid train to back him. On the other hand, <strong>Jonathan Milan</strong> performed below expectations, tomorrow we will undoubtedly see if Friday was just one bad day. <strong>Ethan Vernon</strong> was a solid 3rd, he's definitely in podium contention but does he have what it takes to win?</p>
+<p>Stage 1 might have given us some answers, but the late crash in Burgas meant prevented some favourites from showing up, so there are a few riders whose form we do not know. Both <strong>Dylan Groenewegen</strong> and <strong>Kaden Groves</strong> could do well on a finish like tomorrow's, but they suffered injuries following the crash, so perhaps they won't be at 100% tomorrow. <strong>Arnaud De Lie</strong> was spared, but the crash prevented him to sprint so we're not sure about his form, especially after Famenne-gate.</p>
+<p>That's it from us, What are your opinions and predictions?</p></div>
+          <button type="button" class="btn" onclick="toggleRedditExpand(this)">Expand</button>
+        </div>
       </div>
     </section>
 

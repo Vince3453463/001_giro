@@ -23,6 +23,32 @@ def race_overview_url(*, race: RaceRef) -> str:
     return f"https://firstcycling.com/race.php?r={race.race_id}&y={race.year}"
 
 
+def absolute_firstcycling_url(href: str) -> str:
+    href = (href or "").strip()
+    if href.startswith(("http://", "https://")):
+        return href
+    if href.startswith("//"):
+        return "https:" + href
+    if href.startswith("/"):
+        return "https://firstcycling.com" + href
+    return "https://firstcycling.com/" + href.lstrip("./")
+
+
+def extract_stage_profile_image_url(html: str) -> str | None:
+    """
+    Return absolute URL of the stage elevation/profile image on a FirstCycling stage page.
+    """
+    soup = BeautifulSoup(html, "html.parser")
+    for im in soup.find_all("img"):
+        src = (im.get("src") or "").strip()
+        if not src:
+            continue
+        low = src.lower()
+        if "/ritt_etapper/" in low.replace("\\", "/") and low.endswith((".jpg", ".jpeg", ".png", ".webp")):
+            return absolute_firstcycling_url(src)
+    return None
+
+
 def _norm_cols(df: pd.DataFrame) -> pd.DataFrame:
     out = df.copy()
     out.columns = [str(c).strip() for c in out.columns]
