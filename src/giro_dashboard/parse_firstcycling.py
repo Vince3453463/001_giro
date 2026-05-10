@@ -29,6 +29,39 @@ def _norm_cols(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
+def clean_standings_table(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Normalize FirstCycling tables:
+    - Drop empty/unnamed columns (often country flags / icons).
+    - Drop columns that are entirely blank.
+    """
+    out = _norm_cols(df)
+
+    drop_cols: list[str] = []
+    for c in out.columns:
+        name = str(c).strip()
+        if not name:
+            drop_cols.append(c)
+            continue
+        if name.lower().startswith("unnamed"):
+            drop_cols.append(c)
+            continue
+
+    if drop_cols:
+        out = out.drop(columns=drop_cols, errors="ignore")
+
+    # Drop columns that are all empty/whitespace after fill.
+    out2 = out.copy().fillna("")
+    keep_cols: list[str] = []
+    for c in out2.columns:
+        series = out2[c].astype(str).map(str.strip)
+        if (series != "").any():
+            keep_cols.append(c)
+    out = out2[keep_cols]
+
+    return out
+
+
 def _score_table(cols: list[str], *, wanted_any: Iterable[str]) -> int:
     cols_l = [c.lower() for c in cols]
     score = 0
@@ -83,7 +116,7 @@ def parse_stage_standings(html: str) -> pd.DataFrame:
         ),
     )
     if df is not None:
-        return df
+        return clean_standings_table(df)
 
     soup = BeautifulSoup(html, "html.parser")
     tables = soup.find_all("table")
@@ -110,7 +143,7 @@ def parse_stage_standings(html: str) -> pd.DataFrame:
 
     header = best_rows[0]
     data = best_rows[1:]
-    return pd.DataFrame(data, columns=header)
+    return clean_standings_table(pd.DataFrame(data, columns=header))
 
 
 def parse_gc_standings(html: str) -> pd.DataFrame:
@@ -119,20 +152,43 @@ def parse_gc_standings(html: str) -> pd.DataFrame:
     The exact table varies; we try to auto-detect.
     """
     dfs = _read_html_tables(html)
-    df = _pick_best_table(
-        dfs,
-        wanted_any=(
-            "GC",
-            "General",
-            "Rank",
-            "Rider",
-            "Team",
-            "Time",
-            "Gap",
-        ),
-    )
-    if df is not None:
-        return df
+
+    # GC on FirstCycling is often present as a Rider/Team/Time table without explicit "GC" headers.
+    # We therefore score candidates by columns + size, while avoiding small incident tables (DNF/DNS).
+    best_key: tuple[int, int, int] | None = None  # (score, rows, cols)
+    best_df: pd.DataFrame | None = None
+    for cand in dfs:
+        cand = _norm_cols(cand)
+        cols = [str(c).strip() for c in cand.columns]
+        cols_l = [c.lower() for c in cols]
+
+        if not any("rider" in c for c in cols_l):
+            continue
+        if not any("team" in c for c in cols_l):
+            continue
+        if not any("time" in c or "gap" in c for c in cols_l):
+            continue
+
+        # Prefer "overall-like" tables: many rows and no UCI points column.
+        score = 0
+        score += 3 if any("time" in c for c in cols_l) else 0
+        score += 2 if any("gap" in c for c in cols_l) else 0
+        score += 2 if not any(c == "uci" or "uci" in c for c in cols_l) else -2
+        score += 1 if any(c in ("pos", "rank", "#") for c in cols_l) else 0
+
+        rows = int(cand.shape[0])
+        ncols = int(cand.shape[1])
+        if rows < 20:
+            # almost always not GC (typically incident lists)
+            score -= 5
+
+        key = (score, rows, ncols)
+        if best_key is None or key > best_key:
+            best_key = key
+            best_df = cand
+
+    if best_df is not None:
+        return clean_standings_table(best_df)
 
     soup = BeautifulSoup(html, "html.parser")
     tables = soup.find_all("table")
@@ -158,7 +214,7 @@ def parse_gc_standings(html: str) -> pd.DataFrame:
 
     header = best_rows[0]
     data = best_rows[1:]
-    return pd.DataFrame(data, columns=header)
+    return clean_standings_table(pd.DataFrame(data, columns=header))
 
 
 def extract_gc_from_any(html_pages: list[str]) -> pd.DataFrame:

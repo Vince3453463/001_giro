@@ -12,18 +12,49 @@ class RenderContext:
     stage_url: str
     race_url: str
     generated_at_utc: datetime
+    odds_url: str | None = None
+    odds_market_title: str | None = None
 
 
-def _df_to_html_table(df: pd.DataFrame) -> str:
-    df2 = df.copy()
-    df2 = df2.fillna("")
-    return df2.to_html(index=False, classes="table", border=0, escape=True)
+def _escape_html(s: str) -> str:
+    return (
+        s.replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace('"', "&quot;")
+        .replace("'", "&#39;")
+    )
 
 
-def render_dashboard(*, ctx: RenderContext, stage_df: pd.DataFrame, gc_df: pd.DataFrame) -> str:
+def _df_to_html_table(df: pd.DataFrame, *, table_id: str) -> str:
+    df2 = df.copy().fillna("")
+    cols = [str(c) for c in df2.columns]
+
+    thead = "<thead><tr>" + "".join(f"<th>{_escape_html(c)}</th>" for c in cols) + "</tr></thead>"
+
+    body_rows: list[str] = []
+    for i, row in enumerate(df2.itertuples(index=False, name=None)):
+        tds = "".join(f"<td>{_escape_html(str(v))}</td>" for v in row)
+        body_rows.append(f'<tr data-idx="{i}">{tds}</tr>')
+    tbody = "<tbody>" + "".join(body_rows) + "</tbody>"
+
+    return f'<table id="{_escape_html(table_id)}" class="table" border="0">{thead}{tbody}</table>'
+
+
+def render_dashboard(
+    *,
+    ctx: RenderContext,
+    stage_df: pd.DataFrame,
+    gc_df: pd.DataFrame,
+    odds_df: pd.DataFrame | None = None,
+) -> str:
     generated = ctx.generated_at_utc.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    stage_html = _df_to_html_table(stage_df)
-    gc_html = _df_to_html_table(gc_df)
+    stage_table_id = "stageTable"
+    gc_table_id = "gcTable"
+    odds_table_id = "oddsTable"
+    stage_html = _df_to_html_table(stage_df, table_id=stage_table_id)
+    gc_html = _df_to_html_table(gc_df, table_id=gc_table_id)
+    odds_html = _df_to_html_table(odds_df, table_id=odds_table_id) if odds_df is not None else ""
 
     return f"""<!doctype html>
 <html lang="en">
@@ -139,7 +170,59 @@ def render_dashboard(*, ctx: RenderContext, stage_df: pd.DataFrame, gc_df: pd.Da
     .scroll {{
       overflow-x: auto;
     }}
+    .controls {{
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin: 6px 0 10px;
+    }}
+    .btn {{
+      appearance: none;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      padding: 6px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }}
+    .btn:disabled {{
+      opacity: 0.55;
+      cursor: default;
+    }}
+    .count {{
+      color: var(--muted);
+      font-size: 12px;
+      margin-left: auto;
+    }}
   </style>
+  <script>
+    function setTableLimit(tableId, limit) {{
+      const table = document.getElementById(tableId);
+      if (!table) return;
+      const rows = table.querySelectorAll("tbody tr[data-idx]");
+      rows.forEach((tr) => {{
+        const idx = parseInt(tr.getAttribute("data-idx"), 10);
+        const show = (limit === null) || (idx < limit);
+        tr.style.display = show ? "" : "none";
+      }});
+      const wrap = table.closest("[data-table-wrap]");
+      if (!wrap) return;
+      const expandBtn = wrap.querySelector("[data-action='expand']");
+      const collapseBtn = wrap.querySelector("[data-action='collapse']");
+      if (expandBtn) expandBtn.disabled = (limit === null);
+      if (collapseBtn) collapseBtn.disabled = (limit !== null);
+    }}
+    function expandTable(tableId) {{ setTableLimit(tableId, null); }}
+    function collapseTable(tableId, limit) {{ setTableLimit(tableId, limit); }}
+    window.addEventListener("DOMContentLoaded", () => {{
+      collapseTable("{stage_table_id}", 10);
+      collapseTable("{gc_table_id}", 10);
+      if (document.getElementById("{odds_table_id}")) {{
+        collapseTable("{odds_table_id}", 10);
+      }}
+    }});
+  </script>
 </head>
 <body>
   <div class="wrap">
@@ -155,14 +238,44 @@ def render_dashboard(*, ctx: RenderContext, stage_df: pd.DataFrame, gc_df: pd.Da
     <div class="grid">
       <section class="card">
         <h2>Stage results</h2>
-        <div class="scroll">{stage_html}</div>
+        <div data-table-wrap class="scroll">
+          <div class="controls">
+            <button class="btn" data-action="expand" onclick="expandTable('{stage_table_id}')">Show full</button>
+            <button class="btn" data-action="collapse" onclick="collapseTable('{stage_table_id}', 10)">Show top 10</button>
+            <span class="count">Default: top 10</span>
+          </div>
+          {stage_html}
+        </div>
       </section>
 
       <section class="card">
         <h2>Overall GC</h2>
-        <div class="scroll">{gc_html}</div>
+        <div data-table-wrap class="scroll">
+          <div class="controls">
+            <button class="btn" data-action="expand" onclick="expandTable('{gc_table_id}')">Show full</button>
+            <button class="btn" data-action="collapse" onclick="collapseTable('{gc_table_id}', 10)">Show top 10</button>
+            <span class="count">Default: top 10</span>
+          </div>
+          {gc_html}
+        </div>
       </section>
     </div>
+
+    <section class="card" style="margin-top: 14px;">
+      <h2>Predictions — next stage winner (odds)</h2>
+      <div class="meta" style="margin-bottom: 8px;">
+        {f'<span><a href=\"{ctx.odds_url}\" rel=\"noreferrer\" target=\"_blank\">Odds source</a></span>' if ctx.odds_url else ''}
+        {f'<span>{_escape_html(ctx.odds_market_title)}</span>' if ctx.odds_market_title else ''}
+      </div>
+      <div data-table-wrap class="scroll">
+        <div class="controls">
+          <button class="btn" data-action="expand" onclick="expandTable('{odds_table_id}')">Show full</button>
+          <button class="btn" data-action="collapse" onclick="collapseTable('{odds_table_id}', 10)">Show top 10</button>
+          <span class="count">Default: top 10</span>
+        </div>
+        {odds_html if odds_df is not None else '<div class=\"note\">Odds not available.</div>'}
+      </div>
+    </section>
 
     <div class="note">
       Data is copied from FirstCycling tables (MVP). Predictions and richer visuals can be layered on later.
