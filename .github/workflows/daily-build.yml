@@ -3,7 +3,13 @@ name: Daily dashboard build
 on:
   schedule:
     - cron: "0 18 * * *"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: Last completed stage (same as scripts arg). Predictions/profile/odds use stage+1.
+        required: false
+        default: ""
+        type: string
 
 permissions:
   contents: write
@@ -11,6 +17,9 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      # Used when schedule runs or when workflow_dispatch is started without a stage input.
+      DEFAULT_LAST_COMPLETED_STAGE: "3"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -27,7 +36,9 @@ jobs:
 
       - name: Build dashboard
         run: |
-          python scripts/build_dashboard.py --stage 2
+          STAGE="${{ inputs.stage }}"
+          if [ -z "$STAGE" ]; then STAGE="$DEFAULT_LAST_COMPLETED_STAGE"; fi
+          python scripts/build_dashboard.py --stage "$STAGE"
 
       - name: Commit updated docs
         run: |

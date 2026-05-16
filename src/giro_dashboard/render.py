@@ -88,6 +88,7 @@ def _render_reddit_predictions_section(content: RedditPredictionsContent | None)
         <span><strong>{tt}</strong></span>
         <span><a href="{pl}" rel="noreferrer" target="_blank">Open on Reddit</a></span>
       </div>
+      <p class="note" style="margin: 0 0 12px; line-height: 1.35;">Picks such as <strong>Breakaway</strong> mean a winner from the break, not one rider on the start list. They are not mapped onto the odds Pick column.</p>
 """
     ]
 

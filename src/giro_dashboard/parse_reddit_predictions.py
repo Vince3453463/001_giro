@@ -29,6 +29,66 @@ class RedditPredictionsContent:
     error_note: str | None = None
 
 
+def find_predictions_thread_url(
+    *,
+    subreddit: str = "peloton",
+    year: int,
+    stage: int,
+) -> str | None:
+    """
+    Locate the r/peloton predictions post for a Giro d'Italia stage (by search + title filter).
+    Returns a canonical https://www.reddit.com/... URL, or None if not found.
+    """
+    if stage < 1:
+        return None
+    from urllib.parse import quote_plus
+
+    # quoted query; restrict_sr is appended as raw param for compatibility
+    q = quote_plus(f"Predictions thread {year} Giro stage {stage}")
+    search_url = (
+        f"https://www.reddit.com/r/{subreddit}/search.json?q={q}"
+        f"&restrict_sr=on&sort=new&limit=25"
+    )
+    try:
+        raw = fetch_html(search_url)
+        data = json.loads(raw)
+    except (json.JSONDecodeError, KeyError, TypeError, ValueError):
+        return None
+    except Exception:  # noqa: BLE001
+        return None
+
+    children = data.get("data", {}).get("children", [])
+    stage_re = re.compile(rf"\bstage\s*{stage}\b", re.IGNORECASE)
+    year_s = str(year)
+
+    for child in children:
+        post = child.get("data") if isinstance(child, dict) else None
+        if not isinstance(post, dict):
+            continue
+        title = str(post.get("title") or "")
+        tl = title.lower()
+        if "prediction" not in tl:
+            continue
+        if "[results thread]" in tl:
+            continue
+        if "[race thread]" in tl:
+            continue
+        if "giro" not in tl and "d'italia" not in tl and "d’italia" not in tl:
+            di = tl.replace("'", "").replace("’", "")
+            if "ditalia" not in di:
+                continue
+        if year_s not in title and year_s not in str(post.get("url") or ""):
+            continue
+        if not stage_re.search(title):
+            continue
+        perm = str(post.get("permalink") or "").strip().split("?")[0].rstrip("/")
+        if not perm.startswith("/r/"):
+            continue
+        return "https://www.reddit.com" + perm
+
+    return None
+
+
 def normalize_reddit_thread_url(url: str) -> str:
     u = (url or "").strip().split("?", maxsplit=1)[0].rstrip("/")
     if u.endswith(".json"):
@@ -188,6 +248,37 @@ def _clean_pick_token(raw: str) -> str:
     return t.strip()
 
 
+_NON_RIDER_THREAD_PICK_FOLD = frozenset(
+    {
+        _fold_name(x)
+        for x in (
+            "Breakaway",
+            "The breakaway",
+            "Break",
+            "The break",
+            "From the break",
+            "Breakaway rider",
+            "Day-long break",
+            "Day long break",
+        )
+    }
+)
+
+
+def _is_non_rider_thread_pick(folded: str) -> bool:
+    """Thread-only labels (not Oddschecker riders), e.g. winner from the break."""
+    if not folded:
+        return False
+    if folded in _NON_RIDER_THREAD_PICK_FOLD:
+        return True
+    parts = folded.split()
+    if "breakaway" in parts:
+        return True
+    if folded.startswith("breakaway ") or folded.endswith(" breakaway"):
+        return True
+    return False
+
+
 def _parse_star_picks_from_text(md: str) -> list[tuple[int, str]]:
     """Lines like '★★★ Magnier' or '★ De Lie, Groenewegen' → flat (n_stars, surname) pairs."""
     out: list[tuple[int, str]] = []
@@ -294,6 +385,8 @@ def build_rider_star_map(
     for n_star, raw_name in picks:
         pk = _fold_name(_clean_pick_token(raw_name))
         if not pk:
+            continue
+        if _is_non_rider_thread_pick(pk):
             continue
         rider = _match_pick_to_rider(pk, riders, assigned, fold_to_riders)
         if rider is None:

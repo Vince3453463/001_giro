@@ -21,7 +21,12 @@ from giro_dashboard.parse_firstcycling import (
     stage_url,
 )
 from giro_dashboard.parse_oddschecker import find_next_stage_winner_market, parse_stage_winner_odds
-from giro_dashboard.parse_reddit_predictions import attach_reddit_star_column, fetch_reddit_predictions
+from giro_dashboard.parse_reddit_predictions import (
+    RedditPredictionsContent,
+    attach_reddit_star_column,
+    fetch_reddit_predictions,
+    find_predictions_thread_url,
+)
 from giro_dashboard.render import RenderContext, render_dashboard
 
 
@@ -39,8 +44,11 @@ def main() -> int:
     ap.add_argument("--out", type=str, default=str(Path("docs") / "index.html"))
     ap.add_argument(
         "--reddit-url",
-        default="https://www.reddit.com/r/peloton/comments/1t8cnsw/predictions_thread_2026_giro_ditalia_stage_3/",
-        help="r/peloton predictions thread (canonical URL). Override with env GIRO_REDDIT_PREDICTIONS_URL.",
+        default=None,
+        help=(
+            "Optional explicit r/peloton thread URL. If omitted, searches for the predictions post for "
+            "--year and the next stage (see README). Override with env GIRO_REDDIT_PREDICTIONS_URL."
+        ),
     )
     ap.add_argument("--no-reddit", action="store_true", help="Skip Reddit predictions block.")
     args = ap.parse_args()
@@ -62,11 +70,32 @@ def main() -> int:
     odds_df = parse_stage_winner_odds(market.url, odds_mode=odds_mode_py)
 
     reddit_content = None
+    predictions_stage = args.stage + 1
     if not args.no_reddit:
+        reddit_url: str | None = None
         env_r = os.environ.get("GIRO_REDDIT_PREDICTIONS_URL")
-        reddit_url = (env_r if env_r is not None else args.reddit_url).strip()
+        if env_r is not None and env_r.strip():
+            reddit_url = env_r.strip()
+        elif args.reddit_url and str(args.reddit_url).strip():
+            reddit_url = str(args.reddit_url).strip()
+        else:
+            reddit_url = find_predictions_thread_url(year=args.year, stage=predictions_stage)
+
         if reddit_url:
             reddit_content = fetch_reddit_predictions(reddit_url)
+        else:
+            reddit_content = RedditPredictionsContent(
+                success=False,
+                permalink="",
+                thread_title="",
+                intro_md="",
+                sections=(),
+                error_note=(
+                    "Could not find a matching r/peloton predictions thread "
+                    f"for Giro stage {predictions_stage} ({args.year}) via search. "
+                    "Set GIRO_REDDIT_PREDICTIONS_URL or pass --reddit-url."
+                ),
+            )
 
     odds_df, reddit_pick_warn = attach_reddit_star_column(odds_df, reddit_content)
     reddit_pick_legend = "Pick" in odds_df.columns
