@@ -1,6 +1,6 @@
 # Giro dashboard (MVP)
 
-Static Giro d'Italia dashboard generated daily from FirstCycling standings, Oddschecker stage-winner odds, and the r/peloton predictions thread for the **next** stage.
+Static Giro d'Italia dashboard generated from FirstCycling standings, Oddschecker stage-winner odds, and the r/peloton predictions thread for the **next** stage.
 
 ## What this does (MVP)
 
@@ -19,10 +19,10 @@ Static Giro d'Italia dashboard generated daily from FirstCycling standings, Odds
 
 ### GitHub Actions
 
-The daily workflow runs `build_dashboard.py` with a configurable last-completed stage:
+The GitHub Actions workflow runs `build_dashboard.py` manually with a configurable last-completed stage:
 
 - Bump `DEFAULT_LAST_COMPLETED_STAGE` in [`.github/workflows/daily-build.yml`](.github/workflows/daily-build.yml) after each stage finishes, **or**
-- Run **Actions → Daily dashboard build → Run workflow** and set the `stage` input.
+- Run **Actions → Dashboard build → Run workflow** and set the `stage` input.
 
 ## Local setup
 

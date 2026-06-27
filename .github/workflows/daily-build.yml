@@ -1,8 +1,6 @@
-name: Daily dashboard build
+name: Dashboard build
 
 on:
-  schedule:
-    - cron: "0 18 * * *"
   workflow_dispatch:
     inputs:
       stage:
@@ -18,7 +16,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      # Used when schedule runs or when workflow_dispatch is started without a stage input.
+      # Used when workflow_dispatch is started without a stage input.
       DEFAULT_LAST_COMPLETED_STAGE: "3"
     steps:
       - name: Checkout
